@@ -134,11 +134,12 @@ defmodule GameServer do
         elem(current_player, 1)
       )
 
+      write_to_clients("\nNew game about to start.. Please wait.... \n", player1, player2)
+
       case IO.gets("\nStart new game? [y/n]: ")
            |> String.trim do
-        "y" ->
-          {rows, columns} = read_rows_columns()
-          initiate_game(elem(player1, 1), elem(player2, 1), rows, columns)
+        "y" -> {rows, columns} = read_rows_columns()
+               initiate_game(elem(player1, 1), elem(player2, 1), rows, columns)
         _ -> :quit
       end
 
