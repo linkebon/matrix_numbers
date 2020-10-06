@@ -1,11 +1,59 @@
 defmodule Game_Server do
   require Logger
-
   @moduledoc """
   Documentation for `Game_Server`.
   Lets two clients connect to the server by for example telnet
   The game starts when two players are connected.
   """
+
+
+  @doc """
+  Initiate the server with ports and the amount of rows and columns
+  """
+  def initiate_server() do
+    port_p1 = case IO.gets("Port player 1: ")
+              |> String.trim()
+              |> Integer.parse() do
+                   {parsed, _} -> parsed
+                   :error ->
+                     IO.puts("\nInvalid port provided.. Try again \n")
+                     initiate_server()
+                 end
+
+    port_p2 = case IO.gets("Port player 2: ")
+              |> String.trim()
+              |> Integer.parse() do
+                   {parsed, _} -> parsed
+                   :error ->
+                     IO.puts("\nInvalid port provided.. Try again \n")
+                     initiate_server()
+                 end
+
+    rows = case IO.gets("Rows [Max 9]: ")
+           |> String.trim()
+           |> Integer.parse() do
+                {parsed, _} -> parsed
+                :error ->
+                  IO.puts("\nInvalid row number provided.. Try again \n")
+                  initiate_server()
+              end
+
+    columns = case IO.gets("Columns [Max 9]: ")
+              |> String.trim()
+              |> Integer.parse() do
+                   {parsed, _} -> parsed
+                   :error ->
+                     IO.puts("\nInvalid column number provided.. Try again \n")
+                     initiate_server()
+                 end
+
+    if(rows > 9 || columns > 9) do
+      IO.puts("Max 9 rows and max 9 columns")
+      initiate_server()
+    end
+
+    start_game(port_p1, port_p2, rows, columns)
+  end
 
   @doc """
   Starts a game server listening on two ports
@@ -13,7 +61,7 @@ defmodule Game_Server do
   ## Examples
       iex> GameLogic.start_game(4000,4001)
   """
-  def start_game(port_player1, port_player2) do
+  def start_game(port_player1, port_player2, rows, columns) do
     {:ok, socket_p1} =
       :gen_tcp.listen(port_player1, [:binary, packet: :line, active: false, reuseaddr: true])
 
@@ -30,14 +78,16 @@ defmodule Game_Server do
     {:ok, client2} = :gen_tcp.accept(socket_p2)
     Logger.info("Player 2 connected")
 
-    initiate_game(client1, client2)
+    initiate_game(client1, client2, rows, columns)
+
+    Logger.info("Game is over!")
   end
 
-  defp initiate_game(socket_p1, socket_p2) do
+  defp initiate_game(socket_p1, socket_p2, rows, columns) do
     player1 = {:player1, socket_p1}
     player2 = {:player2, socket_p2}
     write_to_clients("\n\nWelcome to Matrix game!", player1, player2)
-    game_field = Game_Logic.generate_start_game_field(9, 9)
+    game_field = Game_Logic.generate_start_game_field(rows, columns)
     write_to_clients(Game_Logic.game_field_as_string(game_field), player1, player2)
     current_player = which_players_turn?(player1, player2)
     new_turn(game_field, current_player, player1, player2)
