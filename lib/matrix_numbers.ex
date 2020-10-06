@@ -4,5 +4,4 @@ defmodule Matrix_Numbers do
   def start(_type, _args) do
     GameServer.initiate_server()
   end
-
 end
