@@ -1,6 +1,6 @@
-defmodule Game_Logic do
+defmodule GameLogic do
   @moduledoc """
-  Documentation for `Game_Logic`.
+  Documentation for `GameLogic`.
   Module contains the game logic for running matrix_numbers game
   """
 

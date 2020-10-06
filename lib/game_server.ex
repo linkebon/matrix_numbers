@@ -1,7 +1,7 @@
-defmodule Game_Server do
+defmodule GameServer do
   require Logger
   @moduledoc """
-  Documentation for `Game_Server`.
+  Documentation for `GameServer`.
   Lets two clients connect to the server by for example telnet
   The game starts when two players are connected.
   """
@@ -87,8 +87,8 @@ defmodule Game_Server do
     player1 = {:player1, socket_p1}
     player2 = {:player2, socket_p2}
     write_to_clients("\n\nWelcome to Matrix game!", player1, player2)
-    game_field = Game_Logic.generate_start_game_field(rows, columns)
-    write_to_clients(Game_Logic.game_field_as_string(game_field), player1, player2)
+    game_field = GameLogic.generate_start_game_field(rows, columns)
+    write_to_clients(GameLogic.game_field_as_string(game_field), player1, player2)
     current_player = which_players_turn?(player1, player2)
     new_turn(game_field, current_player, player1, player2)
   end
@@ -104,8 +104,8 @@ defmodule Game_Server do
       elem(other_player, 1)
     )
 
-    new_game_field = Game_Logic.generate_new_game_field(game_field, remove_val)
-    write_to_clients(Game_Logic.game_field_as_string(new_game_field), player1, player2)
+    new_game_field = GameLogic.generate_new_game_field(game_field, remove_val)
+    write_to_clients(GameLogic.game_field_as_string(new_game_field), player1, player2)
     game_over?(new_game_field, current_player, player1, player2)
   end
 
@@ -113,7 +113,7 @@ defmodule Game_Server do
     write_line("Enter number to remove: ", elem(player, 1))
     remove_val = read_int_from_client(elem(player, 1))
 
-    if(Game_Logic.number_exist_in_game_field?(game_field, remove_val)) do
+    if(GameLogic.number_exist_in_game_field?(game_field, remove_val)) do
       remove_val
     else
       number_exist_in_game_field?(game_field, player)
@@ -146,7 +146,7 @@ defmodule Game_Server do
   end
 
   defp game_over?(game_field, current_player, player1, player2) do
-    if(Game_Logic.game_over?(game_field)) do
+    if(GameLogic.game_over?(game_field)) do
       write_line(
         "You won!!! Congratulations!",
         elem(other_players_turn(current_player, player1, player2), 1)
