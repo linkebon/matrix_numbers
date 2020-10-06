@@ -12,46 +12,23 @@ defmodule GameServer do
   """
   def initiate_server() do
     port_p1 = case IO.gets("Port player 1: ")
-              |> String.trim()
-              |> Integer.parse() do
-                   {parsed, _} -> parsed
-                   :error ->
-                     IO.puts("\nInvalid port provided.. Try again \n")
-                     initiate_server()
-                 end
-
-    port_p2 = case IO.gets("Port player 2: ")
-              |> String.trim()
-              |> Integer.parse() do
-                   {parsed, _} -> parsed
-                   :error ->
-                     IO.puts("\nInvalid port provided.. Try again \n")
-                     initiate_server()
-                 end
-
-    rows = case IO.gets("Rows [Max 9]: ")
-           |> String.trim()
-           |> Integer.parse() do
-                {parsed, _} -> parsed
-                :error ->
-                  IO.puts("\nInvalid row number provided.. Try again \n")
-                  initiate_server()
-              end
-
-    columns = case IO.gets("Columns [Max 9]: ")
-              |> String.trim()
-              |> Integer.parse() do
-                   {parsed, _} -> parsed
-                   :error ->
-                     IO.puts("\nInvalid column number provided.. Try again \n")
-                     initiate_server()
-                 end
-
-    if(rows > 9 || columns > 9) do
-      IO.puts("Max 9 rows and max 9 columns")
-      initiate_server()
+                   |> String.trim()
+                   |> Integer.parse() do
+      {parsed, _} -> parsed
+      :error ->
+        IO.puts("\nInvalid port provided.. Try again \n")
+        initiate_server()
     end
 
+    port_p2 = case IO.gets("Port player 2: ")
+                   |> String.trim()
+                   |> Integer.parse() do
+      {parsed, _} -> parsed
+      :error ->
+        IO.puts("\nInvalid port provided.. Try again \n")
+        initiate_server()
+    end
+    {rows, columns} = read_rows_columns()
     start_game(port_p1, port_p2, rows, columns)
   end
 
@@ -156,6 +133,15 @@ defmodule GameServer do
         "You lost.. You took the last element and therefore you lost!",
         elem(current_player, 1)
       )
+
+      case IO.gets("\nStart new game? [y/n]: ")
+           |> String.trim do
+        "y" ->
+          {rows, columns} = read_rows_columns()
+          initiate_game(elem(player1, 1), elem(player2, 1), rows, columns)
+        _ -> :quit
+      end
+
     else
       next_player = which_players_turn?(player1, player2, current_player)
       write_to_clients("#{player_atom_str(next_player)}'s turn! \n", player1, player2)
@@ -188,5 +174,32 @@ defmodule GameServer do
 
   defp write_line(line, socket) do
     :gen_tcp.send(socket, line)
+  end
+
+  defp read_rows_columns() do
+    rows = case IO.gets("Rows [Max 9]: ")
+                |> String.trim()
+                |> Integer.parse() do
+      {parsed, _} -> parsed
+      :error ->
+        IO.puts("\nInvalid row number provided.. Try again \n")
+        read_rows_columns()
+    end
+
+    columns = case IO.gets("Columns [Max 9]: ")
+                   |> String.trim()
+                   |> Integer.parse() do
+      {parsed, _} -> parsed
+      :error ->
+        IO.puts("\nInvalid column number provided.. Try again \n")
+        read_rows_columns()
+    end
+
+    if(rows > 9 || columns > 9) do
+      IO.puts("Max 9 rows and max 9 columns")
+      read_rows_columns()
+    end
+
+    {rows, columns}
   end
 end
